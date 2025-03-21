@@ -11,28 +11,36 @@ response = requests.get(url)
 # Verifica se a resposta foi bem-sucedida
 if response.status_code == 200:
     soup = bs(response.content, 'html.parser')
-    
-    # Função para obter dados
-    def get_data(row):
-        symbol = soup.select(f'#default-table > tbody:nth-child(2) tr:nth-child({row}) > td:nth-child(4) > span:nth-child(1)')[0]
-        market_cap = soup.select(f'#default-table > tbody:nth-child(2) > tr:nth-child({row}) > td:nth-child(5)')[0]
-        price = soup.select(f'#default-table > tbody:nth-child(2) > tr:nth-child({row}) > td:nth-child(6)')[0]
-        var_24h = soup.select(f'#default-table > tbody:nth-child(2) > tr:nth-child({row}) > td:nth-child(7) > span:nth-child(1)')[0]
-        var_7d = soup.select(f'#default-table > tbody:nth-child(2) > tr:nth-child({row}) > td:nth-child(8) > span:nth-child(1)')[0]
-        
-        return symbol, market_cap, price, var_24h, var_7d
 
-    # Coletar dados
-    gold_data = get_data(1)
-    apple_data = get_data(2)
-    microsoft = get_data(3)
-    nvidia = get_data(4)
+    #Lista para armazenar os dados das criptomoedas
+    crypto_data = []
 
-    # Criar DataFrame
-    df = pd.DataFrame([gold_data, apple_data, microsoft, nvidia], columns=['Symbol', 'Market Cap (T)', 'Price', '24h Change', '7d Change'])
+    #Loop para buscar as 10 primeiras criptmoedas
+    for i in range(1, 11):
+        try:
+
+            symbol_element = soup.select(f'#default-table > tbody:nth-child(2) tr:nth-child({i}) > td:nth-child(4) > span:nth-child(1)')[0]
+            market_cap_element = soup.select(f'#default-table > tbody:nth-child(2) > tr:nth-child({i}) > td:nth-child(5)')[0]
+            price_element = soup.select(f'#default-table > tbody:nth-child(2) > tr:nth-child({i}) > td:nth-child(6)')[0]
+            var_24h_element = soup.select(f'#default-table > tbody:nth-child(2) > tr:nth-child({i}) > td:nth-child(7) > span:nth-child(1)')[0]
+            var_7d_element = soup.select(f'#default-table > tbody:nth-child(2) > tr:nth-child({i}) > td:nth-child(8) > span:nth-child(1)')[0]
+
+            symbol = symbol_element.text.strip()
+            market_cap = market_cap_element.text.strip()
+            price = price_element.text.strip()
+            var_24h = var_24h_element.text.strip()
+            var_7d = var_7d_element.text.strip()
+
+            crypto_data.append([symbol, market_cap, price, var_24h, var_7d])
+        except IndexError:
+            print(f'Não foi possível encontrar os dados para a linha {i}')
+            continue   
+
+    # Criar DataFrame com os dados coletados
+    df = pd.DataFrame(crypto_data, columns=['Symbol', 'Market Cap (T)', 'Price', '24h Change', '7d Change'])
 
     # Exibir DataFrame
     print(df)
 
 else:
-    print(f'Falha ao acessar o site. Código de status: {response.status_code}')
+    print(f'Falha ao acessar o site. Status code: {response.status_code}')
