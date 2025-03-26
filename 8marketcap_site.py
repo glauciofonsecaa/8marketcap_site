@@ -40,7 +40,7 @@ if response.status_code == 200:
     df = pd.DataFrame(crypto_data, columns=['Symbol', 'Market Cap (T)', 'Price', '24h Change', '7d Change'])
 
     # Exibir DataFrame
-    print(df)
+    print(df.to_string(justify='center'))
 
 else:
     print(f'Falha ao acessar o site. Status code: {response.status_code}')
